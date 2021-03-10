@@ -19,28 +19,30 @@ public class VRCamera : MonoBehaviour
 
     bool objectTouched;
 
-    void Update() 
+    void Start()
+    {
+        reticleTrs.localScale = initialScale;
+    }
+
+    void Update()
     {
         if(Physics.Raycast(transform.position, transform.forward, out hit, rayDistance, rayLayerDetection))
         {
-            if(!objectTouched) objectTouched = true;
-            if(!reticleTrs) return;
-            reticleTrs.position = hit.point;
+            Target target = hit.collider.GetComponent<Target>();
+            target.HandleColor();
+            reticleTrs.localPosition = hit.point;
             reticleTrs.localScale = initialScale * hit.distance;
-            //reticleTrs.LookAt(hit.normal);
+            reticleTrs.localRotation = Quaternion.LookRotation(hit.normal);
         }
         else
         {
-            if(objectTouched)
-            {
-                objectTouched = false;
-                reticleTrs.localScale = initialScale;
-                reticleTrs.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + 1);
-            }
-        }    
+            reticleTrs.localScale = initialScale;
+            reticleTrs.localPosition = Vector3.zero;
+            reticleTrs.localRotation = Quaternion.identity;
+        }
     }
 
-    void OnDrawGizmosSelected() 
+    void OnDrawGizmosSelected()
     {
         Gizmos.color = rayColor;
         Gizmos.DrawRay(transform.position, transform.forward * rayDistance);
